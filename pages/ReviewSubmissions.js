@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import styles from '../styles';
 
-export default function StudentDashboard() {
+export default function ReviewSubmissions() {
     const navigation = useNavigation();
 
     return (

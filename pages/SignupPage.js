@@ -4,12 +4,12 @@ import { useNavigation } from '@react-navigation/native';
 
 import styles from '../styles';
 
-export default function StudentDashboard() {
+export default function SignupPage() {
     const navigation = useNavigation();
 
     return (
         <View style={styles.container}>
-            <Text>LOG SERVICE</Text>
+            <Text>SIGN UP</Text>
         </View>
     );
 }

@@ -17,11 +17,6 @@ export default function StudentDashboard() {
             />
 
             <Button
-                title="Log Service"
-                onPress={() => navigation.navigate('LogService')}
-            />
-
-            <Button
                 title="Service History"
                 onPress={() => navigation.navigate('ServiceHistory')}
             />

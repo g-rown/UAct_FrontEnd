@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import styles from '../styles';
 
-export default function StudentDashboard() {
+export default function AdminDashboard() {
     const navigation = useNavigation();
 
     return (
@@ -24,6 +24,11 @@ export default function StudentDashboard() {
             <Button
                 title="Review Submissions"
                 onPress={() => navigation.navigate('ReviewSubmissions')}
+            />
+
+            <Button
+                title="Service Accreditation"
+                onPress={() => navigation.navigate('ServiceAccreditation')}
             />
         </View>
 

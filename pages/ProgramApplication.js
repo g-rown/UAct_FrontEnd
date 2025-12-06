@@ -4,12 +4,12 @@ import { useNavigation } from '@react-navigation/native';
 
 import styles from '../styles';
 
-export default function ManageStudents() {
+export default function ProgramApplication() {
     const navigation = useNavigation();
 
     return (
         <View style={styles.container}>
-            <Text>MANAGE STUDENTS</Text>
+            <Text>PROGRAM APPLICATION</Text>
         </View>
     );
 }
