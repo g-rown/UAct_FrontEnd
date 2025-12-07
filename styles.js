@@ -1,18 +1,32 @@
 import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
+    bg: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+
     container: { 
         flex: 1,
         justifyContent: 'center', 
+        alignItems: 'center',
         padding: 20, 
     },    
 
     card: {
-        backgroundColor: "#fff",
+        backgroundColor: "rgba(255,255,255,0.9)",
         padding: 15,
-        marginBottom: 10,
         borderRadius: 8,
-        width: '40%',
+        width: '80%',
+        alignSelf: 'center',
+    },
+
+    nobgcard: {
+        padding: 15,
+        borderRadius: 8,
+        width: '80%',
         alignSelf: 'center',
     },
     
@@ -21,7 +35,6 @@ export default StyleSheet.create({
         fontWeight: '700',          
         marginBottom: 20,         
         textAlign: 'center',      
-        paddingTop: 10,           
     },
 
     input: {
@@ -33,24 +46,24 @@ export default StyleSheet.create({
         backgroundColor: "#fff",
     },
 
-    passwordContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1, // Mimic the border of styles.input
-        borderColor: '#ccc', // Use your input border color
-        borderRadius: 5,     // Use your input border radius
-        marginBottom: 10,
-        height: 50, // Match styles.input height
-    },
-    passwordInput: {
-        flex: 1, // Allows the input to take up most of the space
-        height: '100%',
-        paddingHorizontal: 10,
-    },
-    eyeIcon: {
-        padding: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
+    linkText: {
+        color: "#007bff",
+        fontWeight: "bold",
     },
 
+    footerText: { 
+        textAlign: "center", 
+        marginTop: 15,
+        color: "#fff",
+    },
+
+    button: { backgroundColor: "#0b131dff", padding: 15, borderRadius: 8, alignItems: "center", marginTop: 10 },
+    buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+    link: { textAlign: "center", marginTop: 15, color: "#007bff" },
+
+    img: {
+        alignSelf: 'center',
+        height: 200,
+        width: 200,
+    },
 });

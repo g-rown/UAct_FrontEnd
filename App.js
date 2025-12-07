@@ -7,6 +7,8 @@ import SignupPage from './pages/SignupPage'
 import AdminDashboard from './pages/AdminDashboard'
 import ManageStudents from './pages/ManageStudents'
 import ManagePrograms from './pages/ManagePrograms'
+import AddProgram from './pages/AddProgram'
+import EditProgram from './pages/EditProgram'
 import ReviewSubmissions from './pages/ReviewSubmissions'
 import ServiceAccreditation from './pages/ServiceAccreditation'
 
@@ -29,6 +31,8 @@ export default function App() {
                 <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
                 <Stack.Screen name="ManageStudents" component={ManageStudents} />
                 <Stack.Screen name="ManagePrograms" component={ManagePrograms} />
+                <Stack.Screen name="AddProgram" component={AddProgram} />
+                <Stack.Screen name="EditProgram" component={EditProgram} />
                 <Stack.Screen name="ReviewSubmissions" component={ReviewSubmissions} />
 
                 <Stack.Screen name="StudentDashboard" component={StudentDashboard} />

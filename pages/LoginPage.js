@@ -1,72 +1,100 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Button, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Button, Alert, ImageBackground, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { Feather } from '@expo/vector-icons';
 
 import styles from '../styles';
 
 export default function LoginPage() {
     const navigation = useNavigation();
+    
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
-    try {
-        const response = await axios.post('http://127.0.0.1:8000/api/CSTracker/login/', {
-            username,
-            password,
-        });
-      
-        const data = response.data;
-
-        if (data.is_admin) {
-            navigation.navigate('AdminDashboard');
-        } else if (data.is_student) {
-            navigation.navigate('StudentDashboard');
-        } else {
-            Alert.alert('Error', 'Unknown user role');
+        if (!username || !password) {
+            Alert.alert("Error", "Please enter both username and password.");
+            return;
         }
+
+        setLoading(true);
+
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/api/login/', {
+                username,
+                password,
+            });
+            
+            const data = response.data;
+
+            const token = data.token;
+            const isAdmin = data.is_admin;
+            const isStudent = data.is_student;
+
+            await AsyncStorage.setItem('userToken', token); // 1. Save the token
+            await AsyncStorage.setItem('isAdmin', String(isAdmin)); // 2. Save the Admin status
+            await AsyncStorage.setItem('isStudent', String(isStudent)); // 3. Save the Student status
+
+            if (data.is_admin) {
+                Alert.alert('Login Successful', `Welcome Admin ${data.username}`);
+                navigation.navigate('AdminDashboard');
+            } else if (data.is_student) {
+                Alert.alert('Login Successful', `Welcome Student ${data.username}`);
+                navigation.navigate('StudentDashboard');
+            } else {
+                Alert.alert('Error', 'Unknown user role. Access denied.');
+            }
+            
         } catch (error) {
-        Alert.alert('Login Failed', 'Invalid username or password');
+            console.error("Login attempt failed:", error.response?.data || error.message);
+            const errorMessage = error.response?.data?.non_field_errors?.[0] || 'Invalid username or password.';
+            Alert.alert('Login Failed', errorMessage);
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.card}>
+        <ImageBackground
+            source={require('../assets/redox-01.png')}
+            style={styles.bg}
+        >
+            <Image 
+                source={require('../assets/UA-Logo.png')}
+                style = {styles.img} />
+            <View style={styles.nobgcard}>
                 <Text style={styles.header}>Login</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Username"
                     value={username}
                     onChangeText={setUsername}
+                    autoCapitalize="none"
                 />
 
-                <View style={styles.passwordContainer}> 
-                    <TextInput
-                        style={styles.passwordInput} 
-                        placeholder="Password"
-                        secureTextEntry={!showPassword}
-                        value={password}
-                        onChangeText={setPassword}
-                    />
-                    
-                    <TouchableOpacity
-                        style={styles.eyeIcon}
-                        onPress={() => setShowPassword(!showPassword)}
-                    >
-                        <Feather 
-                            name={showPassword ? 'eye' : 'eye-off'} // Changes icon based on state
-                            size={20}
-                            color="#999"
-                        />
-                    </TouchableOpacity>
-                </View>
+                <TextInput
+                    style={styles.input} 
+                    placeholder="Password"
+                    secureTextEntry={true} 
+                    value={password}
+                    onChangeText={setPassword}
+                />
 
-                <Button title="Login" onPress={handleLogin} />
+                <Button style={styles.button}
+                    title={loading ? 'Logging in...' : 'Login'} 
+                    onPress={handleLogin}
+                    disabled={loading}
+                />
             </View>
-        </View>
+
+            <Text style={styles.footerText}>
+                Don't have an account?{' '}
+                <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+                    <Text style={styles.linkText}>Register here</Text>
+                </TouchableOpacity>
+            </Text>
+        </ImageBackground>
     );
 }
