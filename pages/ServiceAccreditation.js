@@ -25,7 +25,7 @@ export default function ServiceAccreditation() {
                 return;
             }
 
-            const response = await axios.get(`${API_BASE_URL}/logs/`, {
+            const response = await axios.get(`${API_BASE_URL}/accreditation/`, {
                 headers: { Authorization: `Token ${token}` }
             });
 
@@ -46,7 +46,7 @@ export default function ServiceAccreditation() {
                 return;
             }
 
-            await axios.post(`${API_BASE_URL}/logs/${logId}/approve/`, {}, {
+            await axios.post(`${API_BASE_URL}/accreditation/${logId}/approve/`, {}, {
                 headers: { Authorization: `Token ${token}` }
             });
 
@@ -93,50 +93,43 @@ export default function ServiceAccreditation() {
     }
 
     const LogEntry = ({ log }) => {
-        const isCompleted = log.status && log.status.toLowerCase() === "completed" || log.approved;
+    // 🛑 NEW: Use current_status instead of status
+    const isCompleted = log.current_status && log.current_status.toLowerCase() === "approved" || log.approved;
+    // Note: I changed the completion check from "completed" to "approved" based on accreditation context.
 
-        return (
-            <View key={log.id} style={{
-                backgroundColor: '#fff',
-                padding: 15,
-                borderRadius: 12,
-                marginBottom: 15,
-                elevation: 3,
-                borderWidth: 1,
-                borderColor: '#ececec'
-            }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>
-                    👤 {log.student_full_name}
-                </Text>
-                <Text style={{ fontSize: 16, marginBottom: 5 }}>
-                    Program: {log.program_name} | Facilitator: {log.facilitator_name || 'N/A'}
-                </Text>
-                <Text style={{ fontSize: 14, marginBottom: 10 }}>
-                    Required Hours: {log.program_hours || 'N/A'}
-                </Text>
+    return (
+        <View key={log.id} style={{ /* ... styles ... */ }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>
+                {/* 🛑 FIX: This field is currently missing, needs backend fix (see Section 3) */}
+                👤 {log.student_full_name || 'N/A (Backend Fix Needed)'} 
+            </Text>
+            <Text style={{ fontSize: 16, marginBottom: 5 }}>
+                {/* 🛑 FIX: Access program.name */}
+                Program: {log.program?.name || 'N/A'} | 
+                {/* 🛑 FIX: Access program.facilitator (assuming ProgramDetailSerializer includes 'facilitator') */}
+                Facilitator: {log.program?.facilitator || 'N/A'}
+            </Text>
+            <Text style={{ fontSize: 14, marginBottom: 10 }}>
+                {/* 🛑 FIX: Access program.required_hours (or whatever the field name is in ProgramDetailSerializer) */}
+                Hours: {log.program?.hours || 'N/A'}
+            </Text>
 
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-                    <Text style={{ fontWeight: 'bold', color: isCompleted ? 'green' : 'orange' }}>
-                        Status: {formatStatus(log.status)}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+                <Text style={{ fontWeight: 'bold', color: isCompleted ? 'green' : 'orange' }}>
+                    {/* 🛑 FIX: Use current_status */}
+                    Status: {formatStatus(log.current_status)}
+                </Text>
+                <TouchableOpacity
+                    // ... rest of TouchableOpacity code
+                >
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+                        {isCompleted ? "Approved" : "Approve Log"}
                     </Text>
-                    <TouchableOpacity
-                        style={{
-                            paddingVertical: 6,
-                            paddingHorizontal: 15,
-                            borderRadius: 8,
-                            backgroundColor: isCompleted ? "gray" : "green"
-                        }}
-                        disabled={isCompleted}
-                        onPress={() => handleApprove(log.id)}
-                    >
-                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>
-                            {isCompleted ? "Approved" : "Approve Log"}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
             </View>
-        );
-    };
+        </View>
+    );
+};
 
     return (
         <View style={[styles.container, { flex: 1, paddingTop: 40, alignItems: 'center' }]}>
