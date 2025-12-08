@@ -33,9 +33,9 @@ export default function LoginPage() {
             const isAdmin = data.is_admin;
             const isStudent = data.is_student;
 
-            await AsyncStorage.setItem('userToken', token); // 1. Save the token
-            await AsyncStorage.setItem('isAdmin', String(isAdmin)); // 2. Save the Admin status
-            await AsyncStorage.setItem('isStudent', String(isStudent)); // 3. Save the Student status
+            await AsyncStorage.setItem('userToken', token);
+            await AsyncStorage.setItem('isAdmin', String(isAdmin));
+            await AsyncStorage.setItem('isStudent', String(isStudent));
 
             if (data.is_admin) {
                 Alert.alert('Login Successful', `Welcome Admin ${data.username}`);
@@ -52,7 +52,7 @@ export default function LoginPage() {
             const errorMessage = error.response?.data?.non_field_errors?.[0] || 'Invalid username or password.';
             Alert.alert('Login Failed', errorMessage);
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
     };
 
@@ -63,11 +63,14 @@ export default function LoginPage() {
         >
             <Image 
                 source={require('../assets/UA-Logo.png')}
-                style = {styles.img} />
-            <View style={styles.nobgcard}>
-                <Text style={styles.header}>Login</Text>
+                style={styles.img}
+            />
+
+            <View style={styles.loginCard}>
+                <Text style={styles.loginHeader}>Login</Text>
+
                 <TextInput
-                    style={styles.input}
+                    style={styles.loginInput}
                     placeholder="Username"
                     value={username}
                     onChangeText={setUsername}
@@ -75,25 +78,32 @@ export default function LoginPage() {
                 />
 
                 <TextInput
-                    style={styles.input} 
+                    style={styles.loginInput}
                     placeholder="Password"
-                    secureTextEntry={true} 
+                    secureTextEntry={true}
                     value={password}
                     onChangeText={setPassword}
                 />
 
-                <Button style={styles.button}
-                    title={loading ? 'Logging in...' : 'Login'} 
+                <TouchableOpacity 
                     onPress={handleLogin}
                     disabled={loading}
-                />
+                    style={styles.loginButton}
+                >
+                    <Text style={styles.loginButtonText}>
+                        {loading ? "Logging in..." : "Login"}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
-            <Text style={styles.footerText}>
+            <Text style={styles.loginFooter}>
                 Don't have an account?{' '}
-                <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-                    <Text style={styles.linkText}>Register here</Text>
-                </TouchableOpacity>
+                <Text 
+                    style={styles.loginFooterLink}
+                    onPress={() => navigation.navigate('Signup')}
+                >
+                    Register here
+                </Text>
             </Text>
         </ImageBackground>
     );
