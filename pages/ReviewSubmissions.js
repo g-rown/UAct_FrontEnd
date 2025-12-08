@@ -1,356 +1,275 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Modal, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Modal,
+  StyleSheet,
+  Alert
+} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../styles';
-import { useNavigation } from '@react-navigation/native';
-
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
-
 export default function ReviewSubmissions() {
-    const navigation = useNavigation();
+  const [programs, setPrograms] = useState([]);
+  const [loadingPrograms, setLoadingPrograms] = useState(true);
+  const [error, setError] = useState(null);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
 
-    const [programs, setPrograms] = useState([]);
-    const [expandedProgramId, setExpandedProgramId] = useState(null);
-    const [expandedStudentId, setExpandedStudentId] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [expandedSubmissionId, setExpandedSubmissionId] = useState(null);
 
-
-    // Modal states
-    const [modalVisible, setModalVisible] = useState(false);
-    const [selectedSubmission, setSelectedSubmission] = useState(null);
-    const [decisionType, setDecisionType] = useState(null);
-
-
-    useEffect(() => {
-        fetchSubmissions();
-    }, []);
-
-
-const fetchSubmissions = async () => {
-    setLoading(true);
-
-
+  // Fetch programs
+  const fetchPrograms = async () => {
     try {
-        const token = await AsyncStorage.getItem('userToken');
-        if (!token) {
-            setError("Unauthorized. Please log in.");
-            setLoading(false);
-            return;
-        }
-
-
-        const response = await axios.get(
-            `${API_BASE_URL}/applications/`,
-            { headers: { Authorization: `Token ${token}` } }
-        );
-
-
-        console.log("📌 Raw applications:", response.data);
-
-
-        const data = response.data || [];
-
-
-        // Group by program
-        const grouped = {};
-        data.forEach(item => {
-            const program = item.program;
-            if (!program) return;
-
-
-            if (!grouped[program.id]) {
-                grouped[program.id] = {
-                    ...program,
-                    submissions: []
-                };
-            }
-
-
-            grouped[program.id].submissions.push(item);
-        });
-
-
-        setPrograms(Object.values(grouped));
-
-
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await axios.get(`${API_BASE_URL}/programs/`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      setPrograms(response.data);
     } catch (err) {
-        console.error("❌ Load error:", err.response?.data || err.message);
-        setError("Failed to load submissions.");
+      setError('Failed to load programs.');
+      console.log(err);
     } finally {
-        setLoading(false);
+      setLoadingPrograms(false);
     }
-};
+  };
 
+  useEffect(() => {
+    fetchPrograms();
+  }, []);
 
-
-
-    const toggleProgram = (id) => {
-        setExpandedProgramId(expandedProgramId === id ? null : id);
-        setExpandedStudentId(null);
-    };
-
-
-    const toggleStudent = (id) => {
-        setExpandedStudentId(expandedStudentId === id ? null : id);
-    };
-
-
-    // 🔥 OPEN DECISION POPUP
-    const openDecisionPopup = (submission, decision) => {
-        setSelectedSubmission(submission);
-        setDecisionType(decision);
-        setModalVisible(true);
-    };
-
-
-    const closePopup = () => {
-        setModalVisible(false);
-        setSelectedSubmission(null);
-        setDecisionType(null);
-    };
-
-
-    // 🔥 SEND DECISION TO BACKEND
-    const handleDecision = async () => {
-        if (!selectedSubmission || !decisionType) return;
-
-
-        try {
-            const token = await AsyncStorage.getItem('userToken');
-            if (!token) throw new Error("User not logged in");
-
-
-            await axios.post(
-                `${API_BASE_URL}/programsubmissions/${selectedSubmission.id}/decide/`,
-                { status: decisionType.toLowerCase() },
-                { headers: { Authorization: `Token ${token}` } }
-            );
-
-
-            closePopup();
-            fetchSubmissions();
-        } catch (err) {
-            console.error("Error updating submission:", err.response?.data || err.message);
-        }
-    };
-
-
-    // --------------------------------
-    // RENDER
-    // --------------------------------
-
-
-    if (loading) {
-        return (
-            <View style={[styles.container, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
-                <ActivityIndicator size="large" color="#007bff" />
-            </View>
-        );
+  // Fetch submissions
+  const fetchSubmissions = async (programId) => {
+    setLoadingSubmissions(true);
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await axios.get(
+        `${API_BASE_URL}/programsubmissions/?program=${programId}`,
+        { headers: { Authorization: `Token ${token}` } }
+      );
+      setSubmissions(response.data);
+    } catch (err) {
+      console.log('Failed to load submissions:', err);
+      Alert.alert('Error', 'Failed to load submissions for this program.');
+    } finally {
+      setLoadingSubmissions(false);
     }
+  };
 
+  const openModal = (program) => {
+    setSelectedProgram(program);
+    setModalVisible(true);
+    setExpandedSubmissionId(null);
+    fetchSubmissions(program.id);
+  };
 
-    if (error) {
-        return (
-            <View style={[styles.container, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
-                <Text style={{ color: 'red', marginBottom: 10 }}>❌ {error}</Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                    <Text style={{ color: '#007bff' }}>Go to Login</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedProgram(null);
+    setSubmissions([]);
+    setExpandedSubmissionId(null);
+  };
 
-
-    return (
-        <View style={[styles.container, { flex: 1, paddingTop: 40, alignItems: 'center' }]}>
-            <View style={{
-                width: '50%',
-                flex: 1,
-                backgroundColor: '#fff',
-                borderWidth: 1,
-                borderColor: '#e0e0e0',
-                borderRadius: 12,
-                overflow: 'hidden'
-            }}>
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'flex-start',
-                    paddingVertical: 10,
-                    paddingHorizontal: 20,
-                    backgroundColor: '#f0f0f0',
-                    borderBottomWidth: 1,
-                }}>
-                    <Text style={{ fontSize: 26, fontWeight: 'bold' }}>Review Submissions</Text>
-                </View>
-
-
-                <ScrollView style={{ flex: 1, paddingHorizontal: 20 }} contentContainerStyle={{ padding: 20 }}>
-                    {programs.map(program => (
-                        <View key={program.id}>
-                            <TouchableOpacity
-                                onPress={() => toggleProgram(program.id)}
-                                style={{
-                                    backgroundColor: '#fff',
-                                    padding: 15,
-                                    borderRadius: 12,
-                                    borderWidth: 1,
-                                    borderColor: '#ececec',
-                                    marginBottom: 10
-                                }}
-                            >
-                                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{program.name}</Text>
-                                <Text style={{ marginTop: 5, color: '#555' }}>
-                                    {program.description}{"\n"}
-                                    Location: {program.location} | Facilitator: {program.facilitator}{"\n"}
-                                    Date: {program.date} | Time: {program.time_start} - {program.time_end}{"\n"}
-                                    Hours: {program.hours} | Slots: {program.slots} | Taken: {program.slots_taken} | Remaining: {program.slots_remaining}
-                                </Text>
-                            </TouchableOpacity>
-
-
-                            {expandedProgramId === program.id && (
-                                <View style={{
-                                    backgroundColor: '#f9f9f9',
-                                    borderWidth: 1,
-                                    borderColor: '#ccc',
-                                    borderRadius: 10,
-                                    marginBottom: 20,
-                                }}>
-                                    {program.submissions.map((submission, index) => {
-                                        const student = submission.application.student;
-
-
-                                        return (
-                                            <View key={submission.id}>
-                                                <TouchableOpacity
-                                                    onPress={() => toggleStudent(submission.id)}
-                                                    style={{ padding: 10 }}
-                                                >
-                                                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
-                                                        {student.user.full_name} - {student.CYS}
-                                                    </Text>
-                                                    <Text>Status: {submission.status}</Text>
-                                                </TouchableOpacity>
-
-
-                                                {expandedStudentId === submission.id && (
-                                                    <View style={{ paddingLeft: 10, paddingBottom: 10 }}>
-                                                        <Text>Emergency Contact: {submission.application.emergency_contact_name}</Text>
-                                                        <Text>Phone: {submission.application.emergency_contact_phone}</Text>
-
-
-                                                        <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                                                            <TouchableOpacity
-                                                                style={{
-                                                                    paddingVertical: 6,
-                                                                    paddingHorizontal: 15,
-                                                                    borderRadius: 8,
-                                                                    backgroundColor: 'green'
-                                                                }}
-                                                                onPress={() => openDecisionPopup(submission, 'Approved')}
-                                                            >
-                                                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Accept</Text>
-                                                            </TouchableOpacity>
-
-
-                                                            <TouchableOpacity
-                                                                style={{
-                                                                    paddingVertical: 6,
-                                                                    paddingHorizontal: 15,
-                                                                    borderRadius: 8,
-                                                                    backgroundColor: 'red',
-                                                                    marginLeft: 10
-                                                                }}
-                                                                onPress={() => openDecisionPopup(submission, 'Rejected')}
-                                                            >
-                                                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Reject</Text>
-                                                            </TouchableOpacity>
-                                                        </View>
-                                                    </View>
-                                                )}
-
-
-                                                {index < program.submissions.length - 1 && (
-                                                    <View style={{ height: 1, backgroundColor: '#ccc', marginHorizontal: 10 }} />
-                                                )}
-                                            </View>
-                                        );
-                                    })}
-                                </View>
-                            )}
-                        </View>
-                    ))}
-                </ScrollView>
-            </View>
-
-
-            {/* ------------------- DECISION MODAL ------------------- */}
-            <Modal
-                visible={modalVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={closePopup}
-            >
-                <View style={modalStyles.modalOverlay}>
-                    <View style={modalStyles.modalContainer}>
-                        <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 15 }}>
-                            {decisionType} Submission
-                        </Text>
-
-
-                        <Text style={{ marginBottom: 20 }}>
-                            Are you sure you want to mark this submission as {decisionType.toLowerCase()}?
-                        </Text>
-
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-                            <TouchableOpacity
-                                style={[modalStyles.modalButton, { backgroundColor: '#ccc' }]}
-                                onPress={closePopup}
-                            >
-                                <Text>Cancel</Text>
-                            </TouchableOpacity>
-
-
-                            <TouchableOpacity
-                                style={[modalStyles.modalButton, { backgroundColor: 'green', marginLeft: 10 }]}
-                                onPress={handleDecision}
-                            >
-                                <Text style={{ color: '#fff' }}>{decisionType}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-        </View>
+  const toggleMoreDetails = (submissionId) => {
+    setExpandedSubmissionId(prevId =>
+      prevId === submissionId ? null : submissionId
     );
+  };
+
+  const updateSubmissionStatus = async (submissionId, newStatus) => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await axios.post(
+        `${API_BASE_URL}/programsubmissions/${submissionId}/update_status/`,
+        { status: newStatus },
+        { headers: { Authorization: `Token ${token}` } }
+      );
+
+      if (response.status === 200) {
+        setSubmissions(prev =>
+          prev.map(s =>
+            s.id === submissionId ? { ...s, status: newStatus } : s
+          )
+        );
+      }
+    } catch (err) {
+      console.log(err);
+      Alert.alert('Error', 'Failed to update status.');
+    }
+  };
+
+  // ---------------- RENDER ----------------
+  if (loadingPrograms) {
+    return (
+      <View style={[styles.container, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#007bff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: 'red' }}>{error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.container, { flex: 1, paddingTop: 40, alignItems: 'center' }]}>
+      <View style={{
+        width: '50%',
+        flex: 1,
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+        borderRadius: 12,
+        overflow: 'hidden'
+      }}>
+        {/* HEADER */}
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          backgroundColor: '#f0f0f0',
+          elevation: 4,
+          borderBottomWidth: 1,
+          borderBottomColor: '#e6e6e6'
+        }}>
+          <Text style={{ fontSize: 26, fontWeight: 'bold' }}>Review Submissions</Text>
+        </View>
+
+        {/* PROGRAM LIST */}
+        <ScrollView style={{ paddingHorizontal: 20 }} contentContainerStyle={{ paddingVertical: 20 }}>
+          {programs.length === 0 ? (
+            <Text style={{ textAlign: 'center', marginTop: 20, color: '#666' }}>No programs found.</Text>
+          ) : programs.map(program => (
+            <TouchableOpacity
+              key={program.id}
+              style={{
+                backgroundColor: '#fff',
+                padding: 15,
+                borderRadius: 12,
+                marginBottom: 15,
+                elevation: 3,
+                borderWidth: 1,
+                borderColor: '#ececec'
+              }}
+              onPress={() => openModal(program)}
+            >
+              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{program.name}</Text>
+              <Text style={{ color: '#555' }}>View submissions →</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* SUBMISSIONS MODAL */}
+      <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={closeModal}>
+        <View style={modalStyles.modalOverlay}>
+          <View style={modalStyles.modalContainer}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
+              {selectedProgram?.name} Submissions
+            </Text>
+
+            {loadingSubmissions ? (
+              <ActivityIndicator size="large" />
+            ) : submissions.length === 0 ? (
+              <Text>No submissions for this program.</Text>
+            ) : (
+              <ScrollView style={{ maxHeight: 300 }}>
+                {submissions.map(item => (
+                  <View key={item.id} style={{
+                    padding: 12,
+                    backgroundColor: '#f7f7f7',
+                    borderRadius: 10,
+                    marginBottom: 10,
+                    borderColor: expandedSubmissionId === item.id ? '#007bff' : '#f7f7f7',
+                    borderWidth: 1
+                  }}>
+                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{item.student_name}</Text>
+                    <Text>{item.course_section}</Text>
+                    <Text>Status: {item.status.toUpperCase()}</Text>
+
+                    {expandedSubmissionId === item.id && (
+                      <View style={{ marginTop: 10, borderTopWidth: 1, borderTopColor: '#e0e0e0', paddingTop: 10 }}>
+                        <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Emergency Contact Details:</Text>
+                        <Text>Name: {item.emergency_contact_name || 'N/A'}</Text>
+                        <Text>Phone: {item.emergency_contact_phone || 'N/A'}</Text>
+                      </View>
+                    )}
+
+                    <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between', alignItems: 'center' }}>
+                      {item.status.toUpperCase() === 'PENDING' ? (
+                        <View style={{ flexDirection: 'row' }}>
+                          <TouchableOpacity
+                            style={{ backgroundColor: 'green', paddingVertical: 6, paddingHorizontal: 15, borderRadius: 8 }}
+                            onPress={() => updateSubmissionStatus(item.id, 'approved')}
+                          >
+                            <Text style={{ color: 'white' }}>Accept</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={{ backgroundColor: 'red', paddingVertical: 6, paddingHorizontal: 15, borderRadius: 8, marginLeft: 10 }}
+                            onPress={() => updateSubmissionStatus(item.id, 'rejected')}
+                          >
+                            <Text style={{ color: 'white' }}>Reject</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <View style={{ backgroundColor: '#ccc', paddingVertical: 6, paddingHorizontal: 15, borderRadius: 8 }}>
+                          <Text style={{ color: '#555', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                            {item.status}
+                          </Text>
+                        </View>
+                      )}
+
+                      <TouchableOpacity
+                        style={{ backgroundColor: '#007bff', paddingVertical: 6, paddingHorizontal: 15, borderRadius: 8, marginLeft: 10 }}
+                        onPress={() => toggleMoreDetails(item.id)}
+                      >
+                        <Text style={{ color: 'white' }}>{expandedSubmissionId === item.id ? 'Hide Details' : 'More Details'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+
+            <TouchableOpacity
+              onPress={closeModal}
+              style={{ marginTop: 15, padding: 10, backgroundColor: '#ccc', borderRadius: 8, alignSelf: 'flex-end' }}
+            >
+              <Text>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
 }
 
-
 const modalStyles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    modalContainer: {
-        width: '40%',
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 20
-    },
-    modalButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 8
-    }
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalContainer: {
+    width: '45%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20
+  }
 });
-
-
-
