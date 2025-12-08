@@ -6,6 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import styles from '../styles'; 
 
+// 🚨 REMINDER: Change this IP to 10.0.2.2 (Android Emulator) 
+// or your local IP (Physical Device) if you haven't already.
 const API_BASE_URL = 'http://127.0.0.1:8000/api'; 
 
 export default function ManageStudents() {
@@ -68,76 +70,11 @@ export default function ManageStudents() {
     );
 
     // --- Admin Actions ---
-
-    const handleDeleteStudent = (studentId) => {
-    Alert.alert(
-        "Confirm Deletion",
-        "Are you sure you want to delete this student and all associated records? This action cannot be undone.",
-        [
-            {
-                text: "Cancel",
-                style: "cancel"
-            },
-            {
-                text: "Delete",
-                style: "destructive",
-                onPress: async () => {
-                    setIsLoading(true);
-                    
-                    // CRITICAL: Re-fetch the token right before the action to ensure it's fresh
-                    const token = await AsyncStorage.getItem('userToken');
-
-                    if (!token) {
-                        Alert.alert("Error", "Authentication token is missing.");
-                        setIsLoading(false);
-                        return;
-                    }
-                    
-                    try {
-                        console.log("Attempting DELETE on:", `${API_BASE_URL}/students/${studentId}/`); 
-                        console.log("Token: ", token.substring(0, 10) + '...'); // Log partial token
-
-                        await axios.delete(
-                            `${API_BASE_URL}/students/${studentId}/`,
-                            {
-                                headers: {
-                                    'Authorization': `Token ${token}` // Use the freshly fetched token
-                                }
-                            }
-                        );
-                        
-                        Alert.alert("Success", "Student profile deleted successfully.");
-                        // Re-fetch the list using the token
-                        fetchStudents(token); 
-
-                    } catch (err) {
-                        const status = err.response?.status;
-                        const data = err.response?.data;
-                        
-                        // LOG THE FULL ERROR DETAILS TO THE RN CONSOLE
-                        console.error(`Deletion Error Status ${status}:`, data || err.message);
-                        
-                        let errorMessage = "Failed to delete student.";
-                        if (status === 403) {
-                            errorMessage = "Permission Denied. Are you logged in as an Admin?";
-                        } else if (status === 404) {
-                            errorMessage = "Student not found.";
-                        } else if (status === 500) {
-                            errorMessage = "Internal Server Error (Check Django logs for ProtectedError).";
-                        }
-                        
-                        Alert.alert("Error", errorMessage);
-                        setIsLoading(false);
-                    }
-                }
-            }
-        ]
-    );
-};
-
+    
+    // 🗑️ DELETE functions removed.
+    
     const handleEditStudent = (studentData) => {
-        // Navigate to a new screen for editing the student's details
-        // You'll need to create this 'EditStudent' screen and define the route in your navigator.
+        // Navigate to the EditStudent screen
         navigation.navigate('EditStudent', { student: studentData });
     };
 
@@ -166,12 +103,7 @@ export default function ManageStudents() {
                     <Text style={styles.buttonText}>Edit</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={[styles.actionButton, styles.deleteButton]}
-                    onPress={() => handleDeleteStudent(item.id)}
-                >
-                    <Text style={styles.buttonText}>Delete</Text>
-                </TouchableOpacity>
+                {/* 🗑️ DELETE button removed */}
             </View>
         </View>
     );
