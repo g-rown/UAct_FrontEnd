@@ -103,14 +103,32 @@ export default function AddProgram() {
                     <Text>Facilitator</Text>
                     <TextInput style={styles.input} value={facilitator} onChangeText={setFacilitator} />
 
-                    <Text>Date (YYYY-MM-DD) *</Text>
-                    <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="2025-12-07" />
+                    <Text>Date *</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={date}
+                        onChangeText={setDate}
+                        placeholder="Enter date (YYYY-MM-DD)"
+                        placeholderTextColor="#888"
+                    />
 
-                    <Text>Time Start (HH:MM) *</Text>
-                    <TextInput style={styles.input} value={timeStart} onChangeText={setTimeStart} placeholder="08:00" />
+                    <Text>Time Start *</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={timeStart}
+                        onChangeText={setTimeStart}
+                        placeholder="Enter start time (HH:MM)"
+                        placeholderTextColor="#888"
+                    />
 
-                    <Text>Time End (HH:MM) *</Text>
-                    <TextInput style={styles.input} value={timeEnd} onChangeText={setTimeEnd} placeholder="12:00" />
+                    <Text>Time End *</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={timeEnd}
+                        onChangeText={setTimeEnd}
+                        placeholder="Enter end time (HH:MM)"
+                        placeholderTextColor="#888"
+                    />
 
                     <Text>Hours *</Text>
                     <TextInput style={styles.input} value={hours} onChangeText={setHours} keyboardType="numeric" />
