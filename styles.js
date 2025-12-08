@@ -24,10 +24,12 @@ export default StyleSheet.create({
     },
 
     nobgcard: {
-        padding: 15,
+        padding: 20,
         borderRadius: 8,
-        width: '80%',
+        width: '97%',
         alignSelf: 'center',
+        marginTop: 20,
+        backgroundColor: "rgba(255,255,255,0.9)",
     },
     
     header: {
@@ -39,7 +41,7 @@ export default StyleSheet.create({
 
     input: {
         borderWidth: 1,
-        borderColor: "#ccc",
+        borderColor: "#817f7fff",
         padding: 12,
         marginBottom: 15,
         borderRadius: 8,
@@ -54,7 +56,8 @@ export default StyleSheet.create({
     footerText: { 
         textAlign: "center", 
         marginTop: 15,
-        color: "#fff",
+        color: "#011C40",
+        fontWeight: 400
     },
 
     button: { 
@@ -71,8 +74,20 @@ export default StyleSheet.create({
 
     img: {
         alignSelf: 'center',
-        height: 200,
-        width: 200,
+        height: 84,
+        width: 250,
+    },
+
+    loadingScreenContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+    loadingScreenText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#555',
     },
 
 
@@ -235,7 +250,23 @@ export default StyleSheet.create({
         alignItems: "center",
     },
 
-        /* ---------------------------------------------------------
+
+    signupButton: {
+        backgroundColor: "#011C40",
+        padding: 15,
+        borderRadius: 8,
+        alignItems: "center",
+        marginTop: 10,
+
+    },
+
+    signupButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: 16,
+    }, 
+
+    /* ---------------------------------------------------------
        STUDENT DASHBOARD PAGE STYLES
     --------------------------------------------------------- */
 
@@ -245,7 +276,7 @@ export default StyleSheet.create({
         color: '#fff',
         textAlign: 'center',
         marginBottom: 30,
-        textShadowColor: 'rgba(0,0,0,0.5)',
+        textShadowColor: '#011C40',
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 4,
     },
@@ -254,16 +285,18 @@ export default StyleSheet.create({
         backgroundColor: '#011C40',
         padding: 15,
         borderRadius: 10,
-        width: '80%',
+        width: '100%',
         alignItems: 'center',
         marginVertical: 10,
         elevation: 3,
+        height: 120
     },
 
     dashboardButtonText: {
         fontSize: 16,
         fontWeight: '600',
         color: '#fff',
+        textAlign: 'center'
     },
 
         /* ---------------------------------------------------------
@@ -272,20 +305,21 @@ export default StyleSheet.create({
 
     loginCard: {
         backgroundColor: "rgba(255,255,255,0.92)",
-        padding: 20,
-        width: "85%",
+        padding: 25,
+        width: "88%",
         borderRadius: 12,
         alignSelf: "center",
-        marginTop: 20,
         elevation: 5,
+        marginTop: 30,
+        marginBotton: 20
     },
 
     loginHeader: {
-        fontSize: 30,
+        fontSize: 28,
         fontWeight: "700",
         textAlign: "center",
         marginBottom: 20,
-        color: "#0b131dff",
+        color: "#011C40",
     },
 
     loginInput: {
@@ -315,13 +349,45 @@ export default StyleSheet.create({
     loginFooter: {
         textAlign: "center",
         marginTop: 15,
-        color: "#fff",
+        color: "#011C40",
         fontSize: 14,
+        fontWeight: 400
     },
 
     loginFooterLink: {
         color: "#011C40",
         fontWeight: "700",
+    },
+
+    rememberMeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+        width: '100%',
+        paddingLeft: 5,
+    },
+    checkbox: {
+        height: 16,
+        width: 16,
+        borderRadius: 3,
+        borderWidth: 2,
+        borderColor: '#011C40',
+        marginRight: 6,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    checkboxChecked: {
+        backgroundColor: '#011C40',
+    },
+    checkmark: {
+        color: 'white',
+        fontSize: 10,
+        fontWeight: 'bold',
+    },
+    rememberMeText: {
+        fontSize: 14,
+        paddingBottom: 2,
+        color: '#333',
     },
 
     /* ---------------------------------------------------------
@@ -354,6 +420,43 @@ export default StyleSheet.create({
         color: '#fff',
     },
 
+    buttonContainer: {
+        flexDirection: 'row',
+        width: '90%',
+        justifyContent: 'space-between',
+        marginBottom: 10, 
+        gap: 20
+    },
+    
+    halfButton: {
+        backgroundColor: '#011C40',
+        padding: 15,
+        borderRadius: 10,
+        width: '100%',
+        alignItems: 'center',
+        marginVertical: 10,
+        elevation: 3,
+        height: 120,
+        flex: 1, 
+        width: undefined, 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        marginBottom: 0, 
+    },
+
+    halfButtonText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#fff',
+        textAlign: 'center'
+    },
+
+    welcomeText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 30,
+        color: '#011C40',
+    },
         /* ---------------------------------------------------------
         SIGNUP PAGE STYLES
     --------------------------------------------------------- */
@@ -363,20 +466,21 @@ export default StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
+        marginTop:30
     },
 
     subHeader: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '600',
-        marginTop: 20,
+        marginTop: 10,
         marginBottom: 10,
         color: '#011C40',
     },
 
     signupButtonContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginTop: 20,
+        width: '100%',
+        alignItems: 'center',
+        marginTop: 10,
     },
 
     /* ---------------------------------------------------------
@@ -630,3 +734,4 @@ modalDeleteText: {
     }
 
 });
+

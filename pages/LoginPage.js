@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Button, Alert, ImageBackground, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,6 +12,27 @@ export default function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const [rememberMe, setRememberMe] = useState(false);
+
+    useEffect(() => {
+        loadRememberedCredentials();
+    }, []);
+
+    const loadRememberedCredentials = async () => {
+        try {
+            const savedUsername = await AsyncStorage.getItem('savedUsername');
+            const savedToken = await AsyncStorage.getItem('userToken');
+
+            if (savedUsername) {
+                setUsername(savedUsername); 
+                setRememberMe(true); 
+            }
+            
+        } catch (error) {
+            console.error("Error loading credentials:", error);
+        }
+    };
 
     const handleLogin = async () => {
         if (!username || !password) {
@@ -28,12 +49,19 @@ export default function LoginPage() {
             });
             
             const data = response.data;
-
             const token = data.token;
+
             const isAdmin = data.is_admin;
             const isStudent = data.is_student;
 
-            await AsyncStorage.setItem('userToken', token);
+            if (rememberMe) {
+                await AsyncStorage.setItem('userToken', token);
+                await AsyncStorage.setItem('savedUsername', username);
+            } else {
+                await AsyncStorage.removeItem('userToken');
+                await AsyncStorage.removeItem('savedUsername');
+            }
+
             await AsyncStorage.setItem('isAdmin', String(isAdmin));
             await AsyncStorage.setItem('isStudent', String(isStudent));
 
@@ -61,50 +89,67 @@ export default function LoginPage() {
             source={require('../assets/redox-01.png')}
             style={styles.bg}
         >
-            <Image 
-                source={require('../assets/UA-Logo.png')}
-                style={styles.img}
-            />
-
-            <View style={styles.loginCard}>
-                <Text style={styles.loginHeader}>Login</Text>
-
-                <TextInput
-                    style={styles.loginInput}
-                    placeholder="Username"
-                    value={username}
-                    onChangeText={setUsername}
-                    autoCapitalize="none"
+            <View style={styles.container}>
+                <Image 
+                    source={require('../assets/logo.png')}
+                    style={styles.img}
                 />
 
-                <TextInput
-                    style={styles.loginInput}
-                    placeholder="Password"
-                    secureTextEntry={true}
-                    value={password}
-                    onChangeText={setPassword}
-                />
+                <View style={styles.loginCard}>
+                    <Text style={styles.loginHeader}>Login</Text>
 
-                <TouchableOpacity 
-                    onPress={handleLogin}
-                    disabled={loading}
-                    style={styles.loginButton}
-                >
-                    <Text style={styles.loginButtonText}>
-                        {loading ? "Logging in..." : "Login"}
+                    <TextInput
+                        style={styles.loginInput}
+                        placeholder="Username"
+                        placeholderTextColor='gray'
+                        value={username}
+                        onChangeText={setUsername}
+                        autoCapitalize="none"
+                    />
+
+                    <TextInput
+                        style={styles.loginInput}
+                        placeholder="Password"
+                        placeholderTextColor='gray'
+                        secureTextEntry={true}
+                        value={password}
+                        onChangeText={setPassword}
+                    />
+
+                    <TouchableOpacity
+                        style={styles.rememberMeContainer}
+                        onPress={() => setRememberMe(!rememberMe)} // Toggle state
+                    >
+                        <View style={[
+                            styles.checkbox,
+                            rememberMe && styles.checkboxChecked // Apply checked style
+                        ]}>
+                            {rememberMe && <Text style={styles.checkmark}>✓</Text>}
+                        </View>
+                        <Text style={styles.rememberMeText}>Remember Me</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        onPress={handleLogin}
+                        disabled={loading}
+                        style={styles.loginButton}
+                    >
+                        <Text style={styles.loginButtonText}>
+                            {loading ? "Logging in..." : "Login"}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                <Text style={styles.loginFooter}>
+                    Don't have an account?{' '}
+                    <Text 
+                        style={styles.loginFooterLink}
+                        onPress={() => navigation.navigate('Signup')}
+                    >
+                        Register here
                     </Text>
-                </TouchableOpacity>
-            </View>
-
-            <Text style={styles.loginFooter}>
-                Don't have an account?{' '}
-                <Text 
-                    style={styles.loginFooterLink}
-                    onPress={() => navigation.navigate('Signup')}
-                >
-                    Register here
                 </Text>
-            </Text>
+            </View>
         </ImageBackground>
     );
 }

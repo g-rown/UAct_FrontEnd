@@ -1,8 +1,11 @@
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Image, Alert, TouchableOpacity, Text } from 'react-native';
+import { View, Image, Alert, TouchableOpacity, Text, ActivityIndicator, StyleSheet } from 'react-native';
+
+import styles from './styles';
 
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
@@ -23,6 +26,14 @@ import EditStudent from './pages/EditStudent'
 
 const Stack = createNativeStackNavigator(); 
 const Tab = createBottomTabNavigator();
+
+
+const LoadingScreen = () => (
+    <View style={styles.container}>
+        <ActivityIndicator size="large" color="#021c2eff" />
+        <Text style={styles.text}>Loading user session...</Text>
+    </View>
+);
 
 function StudentTabs() {
 
@@ -105,6 +116,100 @@ function StudentTabs() {
     );
 }
 
+function AdminTabs() {
+
+    const HomeIconActive = require('./assets/icons/dashboardactive.png');
+    const HomeIconInactive = require('./assets/icons/dashboardinactive.png');
+    const ManageStudentsIconActive = require('./assets/icons/managestudentsactive.png');
+    const ManageStudentsIconInactive = require('./assets/icons/managestudentsinactive.png');
+    const ManageProgramsIconActive = require('./assets/icons/manageprogramsactive.png');
+    const ManageProgramsIconInactive = require('./assets/icons/manageprogramsinactive.png');
+    const ReviewSubmissionsIconActive = require('./assets/icons/reviewsubmissionsactive.png');
+    const ReviewSubmissionsIconInactive = require('./assets/icons/reviewsubmissionsinactive.png');
+    const ServiceAccreditationIconActive = require('./assets/icons/servicecreditactive.png');
+    const ServiceAccreditationIconInactive = require('./assets/icons/servicecreditinactive.png');
+
+    return (
+        <Tab.Navigator
+            screenOptions={({ route }) => ({
+                tabBarIcon: ({ focused, color, size }) => {
+                    let imageSource;
+                    const iconSize = 30;
+                    
+                    if (route.name === 'ADashboard') {
+                        imageSource = focused ? HomeIconActive : HomeIconInactive;
+                    } else if (route.name === 'ManageStudents') {
+                        imageSource = focused ? ManageStudentsIconActive : ManageStudentsIconInactive;
+                    } else if (route.name === 'ManagePrograms') {
+                        imageSource = focused ? ManageProgramsIconActive : ManageProgramsIconInactive;
+                    } else if (route.name === 'ReviewSubmissions') {
+                        imageSource = focused ? ReviewSubmissionsIconActive : ReviewSubmissionsIconInactive;
+                    } else if (route.name === 'ServiceAccreditation') {
+                        imageSource = focused ? ServiceAccreditationIconActive : ServiceAccreditationIconInactive;
+                    } 
+                    return (
+                        <Image 
+                            source={imageSource} 
+                            style={{ 
+                                    width: iconSize, 
+                                    height: iconSize,
+                                    tintColor: color,
+                                }} 
+                            />
+                        );
+                },
+
+                tabBarStyle: {
+                    height: 67,       
+                    paddingVertical: 0, 
+                    backgroundColor: '#f8f8f8', 
+                },
+
+                tabBarItemStyle: {
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    paddingTop: 0,
+                    flex: 1,
+                    paddingTop: 15,
+                    paddingBottom: 0
+                },
+
+                tabBarShowLabel: false,
+                tabBarActiveTintColor: '#021c2eff', // Active icon color
+                tabBarInactiveTintColor: 'gray', // Inactive icon color
+                headerShown: false
+            })}
+        >   
+            <Tab.Screen 
+                name="ADashboard" 
+                component={AdminDashboard} 
+                options={{ headerShown: false }}
+            />
+            <Tab.Screen 
+                name="ManageStudents" 
+                component={ManageStudents} 
+                options={{ headerShown: false }}
+            />
+            <Tab.Screen 
+                name="ManagePrograms" 
+                component={ManagePrograms} 
+                ooptions={{ headerShown: false }}
+            />
+            <Tab.Screen 
+                name="ReviewSubmissions" 
+                component={ReviewSubmissions} 
+                options={{ headerShown: false }}
+            />
+            <Tab.Screen 
+                name="ServiceAccreditation" 
+                component={ServiceAccreditation} 
+                options={{ headerShown: false }}
+            />
+            
+        </Tab.Navigator>
+    );
+}
+
 const LogoutIcon = require('./assets/icons/logout.png');
 
 const LogoutButton = ({ navigation }) => {
@@ -137,78 +242,135 @@ const LogoutButton = ({ navigation }) => {
     );
 };
 
+const LogoImage = require('./assets/logo.png');
+const LOGO_STYLE = {
+    width: 120,
+    height: 35, 
+};
+
 export default function App() {
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [userRole, setUserRole] = useState(null); // 'admin', 'student', or null
+
+    useEffect(() => {
+        const checkUserStatus = async () => {
+            try {
+                const token = await AsyncStorage.getItem('userToken');
+                const isAdmin = await AsyncStorage.getItem('isAdmin');
+                const isStudent = await AsyncStorage.getItem('isStudent');
+
+                if (token) {
+                    // Token exists, determine role
+                    if (isAdmin === 'true') {
+                        setUserRole('admin');
+                    } else if (isStudent === 'true') {
+                        setUserRole('student');
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load token:", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkUserStatus();
+    }, []);
+
+    if (isLoading) {
+        // Render a simple loading screen while checking storage
+        return <LoadingScreen />; 
+    }
+
+    const initialRoute = 
+        userRole === 'admin' ? 'AdminDashboard' :
+        userRole === 'student' ? 'StudentDashboard' :
+        'Login';
+
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="Login">
-                <Stack.Screen 
-                    name="Login" 
-                    component={LoginPage} 
-                    options={{ headerShown: false }} 
-                />
-                <Stack.Screen 
-                    name="Signup" 
-                    component={SignupPage} 
-                    options={{ title: 'Student Registration' }}
-                />
+            <Stack.Navigator initialRouteName={initialRoute}>
+                    <Stack.Screen 
+                        name="Login" 
+                        component={LoginPage} 
+                        options={{ headerShown: false }} 
+                    />
+                    <Stack.Screen 
+                        name="Signup" 
+                        component={SignupPage} 
+                        options={{ headerShown: false }} 
+                    />
 
-                <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
-                <Stack.Screen name="ManageStudents" component={ManageStudents} />
-                <Stack.Screen name="ManagePrograms" component={ManagePrograms} />
-                <Stack.Screen name="AddProgram" component={AddProgram} />
-                <Stack.Screen name="EditProgram" component={EditProgram} />
-                <Stack.Screen name="ReviewSubmissions" component={ReviewSubmissions} />
+                    <Stack.Screen 
+                        name="AdminDashboard" 
+                        component={AdminTabs} 
+                        options={({ navigation }) => ({
+                            headerShown: true,
+                            headerTitle: () => (
+                                <Image
+                                    source={LogoImage}
+                                    style={LOGO_STYLE}
+                                />
+                            ),
+                            headerTitleStyle: {
+                                color: '#021c2eff',
+                                fontWeight: 'bold',
+                                fontSize: 22,
+                                marginLeft: 10,
+                            },
+                            headerLeft: () => null,
 
-                {/* <Stack.Screen 
-                    name="StudentDashboard" 
-                    component={StudentDashboard} 
-                    options={{
-                        // Set a friendlier title
-                        title: 'My Community Service Hub', 
-                        
-                        // 👈 THIS REMOVES THE BACK ARROW
+                            headerBackVisible: false,
+                            headerRight: () => (
+                                <LogoutButton navigation={navigation} />
+                            ),
+                            headerStyle: {
+                                backgroundColor: '#FFFFFF',
+                                elevation: 1,
+                                shadowOpacity: 0.1,
+                            },
+                        })} 
+                    />
 
-                        // Customize styles (optional)
-                        headerStyle: {
-                        backgroundColor: '#007AFF', // Blue background
-                        },
-                        headerTintColor: '#fff', // White text color
-                    }} 
-                    /> */}
+                    <Stack.Screen name="AddProgram" component={AddProgram} />
+                    <Stack.Screen name="EditProgram" component={EditProgram} />
 
-                <Stack.Screen 
-                    name="StudentDashboard" 
-                    component={StudentTabs} 
-                    options={({ navigation }) => ({
-                        headerShown: true,
-                        title: 'UAct',
-                        headerTitleStyle: {
-                            color: '#021c2eff',
-                            fontWeight: 'bold',
-                            fontSize: 22,
-                            marginLeft: 10,
-                        },
-                        headerLeft: () => null,
+                    <Stack.Screen 
+                        name="StudentDashboard" 
+                        component={StudentTabs} 
+                        options={({ navigation }) => ({
+                            headerShown: true,
+                            headerTitle: () => (
+                                <Image
+                                    source={LogoImage}
+                                    style={LOGO_STYLE}
+                                />
+                            ),
+                            headerTitleStyle: {
+                                color: '#021c2eff',
+                                fontWeight: 'bold',
+                                fontSize: 22,
+                                marginLeft: 10,
+                            },
+                            headerLeft: () => null,
 
-                        headerBackVisible: false,
-                        headerRight: () => (
-                            <LogoutButton navigation={navigation} />
-                        ),
-                        headerStyle: {
-                            backgroundColor: '#FFFFFF',
-                            elevation: 1,
-                            shadowOpacity: 0.1,
-                        },
-                    })} 
-                />
+                            headerBackVisible: false,
+                            headerRight: () => (
+                                <LogoutButton navigation={navigation} />
+                            ),
+                            headerStyle: {
+                                backgroundColor: '#FFFFFF',
+                                elevation: 1,
+                                shadowOpacity: 0.1,
+                            },
+                        })} 
+                    />
 
-                <Stack.Screen name="ServiceHistory" component={ServiceHistory} />
-                <Stack.Screen name="CommunityPrograms" component={CommunityPrograms} />
-                <Stack.Screen name="ProgramApplication" component={ProgramApplication} />
-                <Stack.Screen name="ServiceAccreditation" component={ServiceAccreditation} />
-                <Stack.Screen name="EditStudent" component={EditStudent} />
+                    <Stack.Screen name="ProgramApplication" component={ProgramApplication} />
+                    <Stack.Screen name="EditStudent" component={EditStudent} />
 
-            </Stack.Navigator> 
+            </Stack.Navigator>
         </NavigationContainer>
     )
 }

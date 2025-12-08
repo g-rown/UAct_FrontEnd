@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, TextInput, ScrollView, Alert, TouchableOpacity, ImageBackground, View } from 'react-native';
+import { Text, TextInput, ScrollView, Alert, TouchableOpacity, ImageBackground, Image, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
@@ -18,12 +18,20 @@ export default function SignupPage() {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
     // --- Signup API ---
     const handleSignup = async () => {
-        if (!firstName || !lastName || !course || !yearLevel || !phoneNumber || !section || !email || !username || !password) {
+        // Check for missing fields
+        if (!firstName || !lastName || !course || !yearLevel || !phoneNumber || !section || !email || !username || !password || !confirmPassword) {
             Alert.alert("Missing Fields", "Please fill in all required fields.");
+            return;
+        }
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            Alert.alert("Validation Error", "Password and Confirm Password must match.");
             return;
         }
 
@@ -63,46 +71,52 @@ export default function SignupPage() {
             source={require('../assets/redox-01.png')}
             style={styles.bg}
         >
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+                 <Image 
+                source={require('../assets/logo.png')}
+                style={styles.img}
+                />
                 <View style={styles.nobgcard}>
-                    <Text style={styles.header}>Create an Account</Text>
+                    <Text style={styles.loginHeader}>Create an Account</Text>
 
                     <Text style={styles.subHeader}>Personal Details</Text>
-                    <TextInput style={styles.input} placeholder="First Name" value={firstName} onChangeText={setFirstName} />
-                    <TextInput style={styles.input} placeholder="Last Name" value={lastName} onChangeText={setLastName} />
-                    <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-                    <TextInput style={styles.input} placeholder="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber} keyboardType="phone-pad" />
+                    <TextInput style={styles.input} placeholder="First Name" placeholderTextColor='gray' value={firstName} onChangeText={setFirstName} />
+                    <TextInput style={styles.input} placeholder="Last Name" placeholderTextColor='gray' value={lastName} onChangeText={setLastName} />
+                    <TextInput style={styles.input} placeholder="Email" placeholderTextColor='gray' value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+                    <TextInput style={styles.input} placeholder="Phone Number" placeholderTextColor='gray' value={phoneNumber} onChangeText={setPhoneNumber} keyboardType="phone-pad" />
 
                     <Text style={styles.subHeader}>Academic Details</Text>
-                    <TextInput style={styles.input} placeholder="Course" value={course} onChangeText={setCourse} autoCapitalize="characters" />
-                    <TextInput style={styles.input} placeholder="Year Level" value={yearLevel} onChangeText={setYearLevel} keyboardType="numeric" />
-                    <TextInput style={styles.input} placeholder="Section" value={section} onChangeText={setSection} autoCapitalize="characters" />
+                    <TextInput style={styles.input} placeholder="Course" placeholderTextColor='gray' value={course} onChangeText={setCourse} autoCapitalize="characters" />
+                    <TextInput style={styles.input} placeholder="Year Level" placeholderTextColor='gray' value={yearLevel} onChangeText={setYearLevel} keyboardType="numeric" />
+                    <TextInput style={styles.input} placeholder="Section" placeholderTextColor='gray' value={section} onChangeText={setSection} autoCapitalize="characters" />
                     
                     <Text style={styles.subHeader}>Account Credentials</Text>
-                    <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} autoCapitalize="none" />
-                    <TextInput style={styles.input} placeholder="Password" secureTextEntry={true} value={password} onChangeText={setPassword} />
+                    <TextInput style={styles.input} placeholder="Username" placeholderTextColor='gray' value={username} onChangeText={setUsername} autoCapitalize="none" />
+                    <TextInput style={styles.input} placeholder="Password" placeholderTextColor='gray' secureTextEntry={true} value={password} onChangeText={setPassword} />
+                    <TextInput style={styles.input} placeholder="Confirm Password" placeholderTextColor='gray' secureTextEntry={true} value={confirmPassword} onChangeText={setConfirmPassword} 
+                    />
 
-                    {/* Centered Sign Up Button */}
-                    <View style={styles.signupButtonContainer}>
+                    <View>
                         <TouchableOpacity
-                            style={styles.dashboardButton} 
+                            style={styles.signupButton} 
                             onPress={handleSignup}
                             disabled={loading}
                         >
-                            <Text style={styles.dashboardButtonText}>
+                            <Text style={styles.signupButtonText}>
                                 {loading ? 'Registering...' : 'Sign Up'}
                             </Text>
                         </TouchableOpacity>
                     </View>
-
+                </View>
+                
                     <Text style={styles.footerText}>
                         Already have an account?{' '}
                         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                            <Text style={styles.linkText}>Log in here</Text>
+                            <Text style={styles.linkText}>Login here</Text>
                         </TouchableOpacity>
                     </Text>
 
-                </View>
+                
             </ScrollView>
         </ImageBackground>
     );
