@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Button, ImageBackground} from 'react-native';
+import { View, Text, TouchableOpacity, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import styles from '../styles';
@@ -13,21 +13,32 @@ export default function StudentDashboard() {
             style={styles.bg}
         >
             <View style={styles.container}>
-                <Text>Welcome, Student!</Text>
+                
+                <Text style={styles.dashboardWelcome}>
+                    Welcome, Student!
+                </Text>
 
-                <Button
-                    title="View Available Programs"
+                {/* View Programs Button */}
+                <TouchableOpacity 
+                    style={styles.dashboardButton}
                     onPress={() => navigation.navigate('CommunityPrograms')}
-                />
+                >
+                    <Text style={styles.dashboardButtonText}>
+                        View Available Programs
+                    </Text>
+                </TouchableOpacity>
 
-                <Button
-                    title="Review Service History"
+                {/* Service History Button */}
+                <TouchableOpacity 
+                    style={styles.dashboardButton}
                     onPress={() => navigation.navigate('ServiceHistory')}
-                />
+                >
+                    <Text style={styles.dashboardButtonText}>
+                        Review Service History
+                    </Text>
+                </TouchableOpacity>
+
             </View>
         </ImageBackground>
-        
     );
 }
-
-
