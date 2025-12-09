@@ -50,7 +50,7 @@ export default function SignupPage() {
         };
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/signup/', userData); 
+            const response = await axios.post('https://uact-backend.onrender.com/api/signup/', userData); 
             Alert.alert('Success', `Account created for ${response.data.username}. Please log in.`);
             navigation.navigate('Login'); 
         } catch (error) {

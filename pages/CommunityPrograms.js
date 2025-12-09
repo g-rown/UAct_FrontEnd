@@ -34,7 +34,7 @@ export default function CommunityPrograms() {
     const navigation = useNavigation();
 
     // Use a variable for the API URL
-    const API_URL = "http://127.0.0.1:8000/api/programs/";
+    const API_URL = "https://uact-backend.onrender.com/api/programs/";
 
     useEffect(() => {
         const fetchPrograms = async () => {

@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from '../styles';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'https://uact-backend.onrender.com/api';
 
 export default function ServiceAccreditation() {
     const [serviceLogs, setServiceLogs] = useState([]);

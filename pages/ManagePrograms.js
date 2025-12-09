@@ -14,7 +14,7 @@ const COLOR_YELLOW = '#ffd800';
 const COLOR_LIGHT_GRAY = '#f4f4f4';
 const COLOR_MEDIUM_GRAY = '#e0e0e0';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'https://uact-backend.onrender.com/api';
 
 export default function ManagePrograms() {
   const navigation = useNavigation();

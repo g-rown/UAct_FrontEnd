@@ -25,7 +25,7 @@ const COLOR_DARK_GRAY = '#333333';
 // ⭐️ Hardcoded API URL - CHANGE THIS to your emulator/device IP!
 // Use 'http://10.0.2.2:8000' for Android Emulator
 // Use 'http://192.168.x.x:8000' for physical device/WIFI
-const API_BASE_URL = 'http://127.0.0.1:8000/api/students'; 
+const API_BASE_URL = 'https://uact-backend.onrender.com/api/students'; 
 
 // Assuming you have an Admin Home screen you want to navigate back to
 const ADMIN_HOME_SCREEN = 'AdminHome'; 

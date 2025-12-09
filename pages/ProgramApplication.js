@@ -42,7 +42,7 @@ const getAuthToken = async () => {
 export default function ProgramApplication({ route, navigation }) {
     const { program } = route.params;
 
-    const API_URL = "http://127.0.0.1:8000/api/applications/";
+    const API_URL = "https://uact-backend.onrender.com/api/applications/";
 
     const [authToken, setAuthToken] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false); 
